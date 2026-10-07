@@ -1,0 +1,29 @@
+name: gf-fetch
+on:
+  workflow_dispatch:
+    inputs:
+      content_id:
+        description: 'gofile content id'
+        required: false
+        default: 'jEeLaEYi'
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch gofile content
+        run: node fetch.js "${{ github.event.inputs.content_id }}"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gf-files
+          path: out/
+          retention-days: 3
