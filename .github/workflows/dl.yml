@@ -1,0 +1,32 @@
+name: dl-url
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'direct URL to download'
+        required: true
+        default: 'https://example.com/file.so'
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download URL
+        run: |
+          mkdir -p out
+          curl -sL --max-time 240 -o out/downloaded.bin "${{ github.event.inputs.url }}" \
+            -H "User-Agent: Mozilla/5.0 (Linux; Android 16; 24053PY09I) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36" \
+            -w "http=%{http_code} size=%{size_download}\n" || true
+          ls -la out/
+          file out/downloaded.bin || true
+          head -c 300 out/downloaded.bin | xxd | head -5 || true
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dl-file
+          path: out/
+          retention-days: 3
